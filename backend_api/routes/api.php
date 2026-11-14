@@ -19,16 +19,27 @@ Route::prefix('v1')->group(function () {
         Route::get('users/me', fn (Illuminate\Http\Request $request) => $request->user());
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::post('orders', [OrderController::class, 'store']);
-        Route::get('orders', [OrderController::class, 'index']);
-        Route::get('orders/{order}', [OrderController::class, 'show']);
+        Route::get('orders', [OrderController::class, 'index'])
+            ->middleware('permission:orders.view');
+        Route::get('orders/{order}', [OrderController::class, 'show'])
+            ->middleware('permission:orders.view');
         Route::post('payments/orders/{order}/payments', [PaymentController::class, 'store']);
 
-        Route::middleware('admin')->group(function () {
-            Route::apiResource('products', ProductController::class)->except(['index', 'show']);
-            Route::apiResource('categories', CategoryController::class)->except(['index']);
-            Route::apiResource('users', UserController::class)->except(['create', 'edit']);
-            Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
-            Route::delete('orders/{order}', [OrderController::class, 'destroy']);
-        });
+        Route::get('users/permissions', [UserController::class, 'permissions'])
+            ->middleware('permission:users.view');
+        Route::apiResource('products', ProductController::class)->except(['index', 'show'])
+            ->middleware('permission:products.manage');
+        Route::apiResource('categories', CategoryController::class)->except(['index'])
+            ->middleware('permission:categories.manage');
+        Route::get('users', [UserController::class, 'index'])
+            ->middleware('permission:users.view');
+        Route::get('users/{user}', [UserController::class, 'show'])
+            ->middleware('permission:users.view');
+        Route::apiResource('users', UserController::class)->except(['index', 'show', 'create', 'edit'])
+            ->middleware('permission:users.manage');
+        Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])
+            ->middleware('permission:orders.manage');
+        Route::delete('orders/{order}', [OrderController::class, 'destroy'])
+            ->middleware('permission:orders.manage');
     });
 });

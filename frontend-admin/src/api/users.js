@@ -1,12 +1,17 @@
 import apiClient from './axios';
 
 export const getUsers = async (params = {}) => {
-  const response = await apiClient.get('/users/', { params });
+  const response = await apiClient.get('/users', { params });
   return response.data;
 };
 
 export const getUserById = async (id) => {
   const response = await apiClient.get(`/users/${id}`);
+  return response.data;
+};
+
+export const createUser = async (data) => {
+  const response = await apiClient.post('/users', data);
   return response.data;
 };
 

@@ -11,6 +11,7 @@ import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Orders from './pages/Orders';
 import Users from './pages/Users';
+import { hasPermission } from './utils/permissions';
 
 // Protected Route
 const ProtectedRoute = ({ children }) => {
@@ -20,11 +21,10 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Admin Route (Only Admin can access Users page)
-const AdminRoute = ({ children }) => {
+const PermissionRoute = ({ children, permission }) => {
   const { user, loading } = useAuth();
   if (loading) return <div>Loading...</div>;
-  if (!user || user.role !== 'admin') return <Navigate to="/" replace />;
+  if (!hasPermission(user, permission)) return <Navigate to="/" replace />;
   return children;
 };
 
@@ -47,9 +47,9 @@ function App() {
             <Route path="categories" element={<Categories />} />
             <Route path="orders" element={<Orders />} />
             <Route path="users" element={
-              <AdminRoute>
+              <PermissionRoute permission="users.view">
                 <Users />
-              </AdminRoute>
+              </PermissionRoute>
             } />
           </Route>
         </Routes>

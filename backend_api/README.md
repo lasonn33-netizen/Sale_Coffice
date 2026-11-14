@@ -35,6 +35,8 @@ Set `VITE_API_BASE_URL=http://localhost:8000/api/v1` in each frontend applicatio
 
 Public endpoints are product/category reads and registration/login. Catalog management, users, order status changes, and deletion require an administrator bearer token.
 
+Admins can create users and assign granular permissions from the Users screen. Staff permissions include `products.view`, `products.manage`, `categories.view`, `categories.manage`, `orders.view`, `orders.manage`, `users.view`, and `users.manage`. Admins always have all permissions.
+
 ```
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
