@@ -7,7 +7,9 @@ import ProductImage from '../common/ProductImage';
 const ProductCard = ({ product }) => {
   const { addItem } = useCart();
   const { t } = useLanguage();
-  const available = product.is_available && product.stock_quantity > 0;
+  const available = product.is_available && (
+    product.stock_quantity === undefined || product.stock_quantity > 0
+  );
 
   return (
     <article className="product-card">
