@@ -41,6 +41,7 @@ class UserController extends Controller
             'role' => 'sometimes|in:customer,staff,admin',
             'is_active' => 'sometimes|boolean',
             'full_name' => 'sometimes|nullable|string|max:255',
+            'password' => 'sometimes|required|string|min:6',
             'permissions' => 'sometimes|array',
             'permissions.*' => 'string|in:'.implode(',', array_keys(User::availablePermissions())),
         ]);
@@ -49,6 +50,9 @@ class UserController extends Controller
         }
         if (($data['role'] ?? $user->role) === 'admin') {
             $data['permissions'] = [];
+        }
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
         }
         $user->update($data);
         return $user->fresh();

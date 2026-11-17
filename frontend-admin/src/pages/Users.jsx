@@ -8,6 +8,8 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingPermissions, setEditingPermissions] = useState(null);
+  const [editingPassword, setEditingPassword] = useState(null);
+  const [passwordForm, setPasswordForm] = useState('');
   const [draftPermissions, setDraftPermissions] = useState([]);
   const [saving, setSaving] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
@@ -61,6 +63,28 @@ const Users = () => {
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.message || 'រក្សាទុកសិទ្ធិបរាជ័យ');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openPasswordEditor = (user) => {
+    setEditingPassword(user);
+    setPasswordForm('');
+  };
+
+  const savePassword = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    try {
+      await updateUser(editingPassword.id, { password: passwordForm });
+      toast.success('ប្ដូរពាក្យសម្ងាត់ដោយជោគជ័យ');
+      setEditingPassword(null);
+      setPasswordForm('');
+    } catch (error) {
+      const validation = error.response?.data?.errors;
+      const message = validation ? Object.values(validation).flat()[0] : error.response?.data?.message;
+      toast.error(message || 'ប្ដូរពាក្យសម្ងាត់បរាជ័យ');
     } finally {
       setSaving(false);
     }
@@ -183,6 +207,7 @@ const Users = () => {
                       >
                         {user.is_active ? 'បិទ' : 'បើក'}
                       </button>
+                      <button className="btn btn-sm btn-outline-primary me-2" disabled={!hasPermission(currentUser, 'users.manage')} onClick={() => openPasswordEditor(user)}>ពាក្យសម្ងាត់</button>
                       <button className="btn btn-sm btn-outline-danger" disabled={!hasPermission(currentUser, 'users.manage') || user.id === currentUser.id} onClick={() => handleDelete(user.id)}>លុប</button>
                     </td>
                   </tr>
@@ -206,6 +231,23 @@ const Users = () => {
               ))}
             </div>
             <div className="permission-modal__footer"><button className="btn btn-light" onClick={() => setEditingPermissions(null)}>បោះបង់</button><button className="btn btn-primary" disabled={saving} onClick={savePermissions}>{saving ? 'កំពុងរក្សាទុក...' : 'រក្សាទុកសិទ្ធិ'}</button></div>
+          </div>
+        </div>
+      )}
+
+      {editingPassword && (
+        <div className="permission-modal" role="dialog" aria-modal="true">
+          <div className="permission-modal__card create-user-card">
+            <div className="permission-modal__header">
+              <div><span className="dashboard-eyebrow">ACCOUNT SECURITY</span><h2>កំណត់ពាក្យសម្ងាត់ថ្មី</h2><p>{editingPassword.full_name || editingPassword.username}</p></div>
+              <button className="btn-close" onClick={() => setEditingPassword(null)} aria-label="បិទ" />
+            </div>
+            <form onSubmit={savePassword}>
+              <div className="create-user-fields">
+                <div><label className="form-label" htmlFor="new-user-password">ពាក្យសម្ងាត់ថ្មី *</label><input id="new-user-password" className="form-control" type="password" minLength="6" value={passwordForm} onChange={(event) => setPasswordForm(event.target.value)} required /></div>
+              </div>
+              <div className="permission-modal__footer"><button type="button" className="btn btn-light" onClick={() => setEditingPassword(null)}>បោះបង់</button><button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'កំពុងរក្សាទុក...' : 'រក្សាទុកពាក្យសម្ងាត់'}</button></div>
+            </form>
           </div>
         </div>
       )}
